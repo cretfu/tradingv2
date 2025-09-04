@@ -8,9 +8,14 @@ let video;
 let label = "Esperando...";
 let confidence = 0;
 
-// Tamaño vertical 9:16 (ajustable)
-let canvasWidth = 360;  // Ancho para modo vertical
-let canvasHeight = 640; // Alto para modo vertical
+// Tamaño del canvas (modo vertical)
+let canvasWidth = 360;
+let canvasHeight = 640;
+
+// Variables para ajustar la relación de aspecto del video
+let videoWidth, videoHeight;
+let videoAspectRatio, canvasAspectRatio;
+let x, y, drawWidth, drawHeight;
 
 // Precargar el modelo
 function preload() {
@@ -24,15 +29,37 @@ function setup() {
   // Configurar la cámara trasera (facingMode: 'environment')
   let constraints = {
     video: {
-      facingMode: 'environment',
-      width: canvasWidth,
-      height: canvasHeight
+      facingMode: 'environment'
+      // No forzar resolución, dejar que la cámara elija la relación de aspecto nativa
     }
   };
   
   // Crear la captura de video con las restricciones
   video = createCapture(constraints);
   video.hide();
+  
+  // Esperar a que el video cargue para obtener sus dimensiones
+  video.on('loadedmetadata', () => {
+    videoWidth = video.width;
+    videoHeight = video.height;
+    videoAspectRatio = videoWidth / videoHeight;
+    canvasAspectRatio = canvasWidth / canvasHeight;
+    
+    // Calcular dimensiones para dibujar el video manteniendo la relación de aspecto
+    if (videoAspectRatio > canvasAspectRatio) {
+      // El video es más ancho que el canvas
+      drawWidth = canvasWidth;
+      drawHeight = drawWidth / videoAspectRatio;
+      x = 0;
+      y = (canvasHeight - drawHeight) / 2;
+    } else {
+      // El video es más alto que el canvas
+      drawHeight = canvasHeight;
+      drawWidth = drawHeight * videoAspectRatio;
+      x = (canvasWidth - drawWidth) / 2;
+      y = 0;
+    }
+  });
   
   // Iniciar la clasificación
   classifyVideo();
@@ -69,8 +96,12 @@ function gotResults(error, results) {
 
 // Dibujar en el canvas
 function draw() {
-  // Dibujar el video ajustado al canvas
-  image(video, 0, 0, width, height);
+  background(0); // Fondo negro
+  
+  // Dibujar el video manteniendo la relación de aspecto
+  if (video) {
+    image(video, x, y, drawWidth, drawHeight);
+  }
   
   // Dibujar overlay semitransparente para mejor legibilidad
   fill(0, 0, 0, 180);
