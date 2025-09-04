@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+  <meta charset="UTF-8">
   <title>Detector de Patrones de Velas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- Librerías actualizadas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.dom.min.js"></script>
-  <script src="https://unpkg.com/ml5@1.7.0/dist/ml5.min.js"></script>
+  <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+  
   <style>
     body {
       margin: 0;
@@ -16,7 +20,6 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: Arial, sans-serif;
     }
     #container {
       position: relative;
@@ -29,31 +32,10 @@
       left: 50%;
       transform: translate(-50%, -50%);
     }
-    #status {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      background-color: rgba(0,0,0,0.5);
-      padding: 10px;
-      border-radius: 5px;
-      z-index: 100;
-    }
-    #loading {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
-  <div id="container">
-    <div id="status">Estado: Iniciando...</div>
-    <div id="loading">Cargando modelo y cámara...</div>
-  </div>
+  <div id="container"></div>
   <script src="sketch.js"></script>
 </body>
 </html>
