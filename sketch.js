@@ -7,15 +7,7 @@ let classifier;
 let video;
 let label = "Esperando...";
 let confidence = 0;
-
-// Tamaño del canvas (modo vertical)
-let canvasWidth = 360;
-let canvasHeight = 640;
-
-// Variables para ajustar la relación de aspecto del video
-let videoWidth, videoHeight;
-let videoAspectRatio, canvasAspectRatio;
-let x, y, drawWidth, drawHeight;
+let videoAspectRatio = 9/16; // Inicialmente 9:16
 
 // Precargar el modelo
 function preload() {
@@ -24,41 +16,30 @@ function preload() {
 
 // Configuración inicial
 function setup() {
-  createCanvas(canvasWidth, canvasHeight);
+  // Usar toda la ventana
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.parent('container');
   
-  // Configurar la cámara trasera (facingMode: 'environment')
+  // Configurar la cámara trasera
   let constraints = {
     video: {
       facingMode: 'environment'
-      // No forzar resolución, dejar que la cámara elija la relación de aspecto nativa
+      // Dejamos que la cámara determine su resolución nativa
     }
   };
   
-  // Crear la captura de video con las restricciones
+  // Crear la captura de video
   video = createCapture(constraints);
   video.hide();
   
-  // Esperar a que el video cargue para obtener sus dimensiones
-  video.on('loadedmetadata', () => {
-    videoWidth = video.width;
-    videoHeight = video.height;
-    videoAspectRatio = videoWidth / videoHeight;
-    canvasAspectRatio = canvasWidth / canvasHeight;
+  // Esperar a que el video cargue para obtener su relación de aspecto real
+  video.on('loadedmetadata', function() {
+    // Calcular la relación de aspecto real del video
+    videoAspectRatio = video.width / video.height;
+    console.log("Relación de aspecto de la cámara: " + videoAspectRatio);
     
-    // Calcular dimensiones para dibujar el video manteniendo la relación de aspecto
-    if (videoAspectRatio > canvasAspectRatio) {
-      // El video es más ancho que el canvas
-      drawWidth = canvasWidth;
-      drawHeight = drawWidth / videoAspectRatio;
-      x = 0;
-      y = (canvasHeight - drawHeight) / 2;
-    } else {
-      // El video es más alto que el canvas
-      drawHeight = canvasHeight;
-      drawWidth = drawHeight * videoAspectRatio;
-      x = (canvasWidth - drawWidth) / 2;
-      y = 0;
-    }
+    // Redimensionar el canvas para que coincida con la relación de aspecto del video
+    resizeCanvas(windowWidth, windowWidth / videoAspectRatio);
   });
   
   // Iniciar la clasificación
@@ -71,7 +52,6 @@ function classifyVideo() {
     classifier.classify(video, gotResults);
   } else {
     console.error("Classifier o video no están listos.");
-    // Reintentar después de 1 segundo
     setTimeout(classifyVideo, 1000);
   }
 }
@@ -81,29 +61,35 @@ function gotResults(error, results) {
   if (error) {
     console.error(error);
     label = "Error";
-    // Reintentar después de 1 segundo
     setTimeout(classifyVideo, 1000);
     return;
   }
   
-  // Actualizar label y confianza
   label = results[0].label;
   confidence = results[0].confidence;
   
-  // Clasificar nuevamente
   classifyVideo();
+}
+
+// Ajustar el canvas cuando cambia el tamaño de la ventana
+function windowResized() {
+  resizeCanvas(windowWidth, windowWidth / videoAspectRatio);
 }
 
 // Dibujar en el canvas
 function draw() {
-  background(0); // Fondo negro
+  background(0);
   
-  // Dibujar el video manteniendo la relación de aspecto
-  if (video) {
-    image(video, x, y, drawWidth, drawHeight);
-  }
+  // Dibujar el video manteniendo su relación de aspecto original
+  let scale = Math.min(width / video.width, height / video.height);
+  let scaledWidth = video.width * scale;
+  let scaledHeight = video.height * scale;
+  let x = (width - scaledWidth) / 2;
+  let y = (height - scaledHeight) / 2;
   
-  // Dibujar overlay semitransparente para mejor legibilidad
+  image(video, x, y, scaledWidth, scaledHeight);
+  
+  // Dibujar overlay semitransparente
   fill(0, 0, 0, 180);
   rect(0, height - 60, width, 60);
   
