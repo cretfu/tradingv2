@@ -1,0 +1,63 @@
+// Variable para el clasificador
+let classifier;
+// Etiqueta resultante
+let label = "Esperando...";
+// Video
+let video;
+// URL del modelo (¡cambia esta URL por la de tu modelo!)
+let modelURL = 'https://teachablemachine.withgoogle.com/models/sva6lJ8Qv/';
+
+// Preload para cargar el modelo
+function preload() {
+  classifier = ml5.imageClassifier(modelURL + 'model.json');
+}
+
+// Setup del sketch
+function setup() {
+  createCanvas(640, 480);
+  // Crear el video y ocultarlo
+  video = createCapture(VIDEO);
+  video.hide();
+  // Comenzar la clasificación
+  classifyVideo();
+}
+
+// Función para clasificar el video
+function classifyVideo() {
+  classifier.classify(video, gotResults);
+}
+
+// Callback para obtener los resultados
+function gotResults(error, results) {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  // results[0] contiene la etiqueta y confianza más alta
+  label = results[0].label;
+  // Volver a clasificar
+  classifyVideo();
+}
+
+// Dibujar en el canvas
+function draw() {
+  background(0);
+  // Dibujar el video
+  image(video, 0, 0, width, height);
+  
+  // Dibujar la etiqueta
+  fill(255);
+  textSize(32);
+  textAlign(CENTER);
+  text(label, width / 2, height - 20);
+  
+  // Opcional: según la etiqueta, mostrar un emoji o mensaje
+  let emoji = "🔴";
+  if (label == "Compra") {
+    emoji = "✅";
+  } else if (label == "Venta") {
+    emoji = "🟥";
+  }
+  textSize(100);
+  text(emoji, width / 2, height / 2);
+}
