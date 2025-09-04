@@ -1,6 +1,6 @@
 // Teachable Machine - Detector de Patrones de Velas
 // URL de tu modelo (¡reemplaza con la URL de tu modelo de Teachable Machine!)
-let modelURL = 'https://teachablemachine.withgoogle.com/models/sva6lJ8Qv/';
+let modelURL = 'https://teachablemachine.withgoogle.com/models/vcOyIBOs5/';
 
 // Variables globales
 let classifier;
@@ -73,3 +73,4 @@ function draw() {
   textAlign(CENTER);
   text(label + " (" + nf(confidence * 100, 2, 1) + "%)", width / 2, height - 20);
 }
+
