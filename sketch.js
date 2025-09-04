@@ -7,7 +7,7 @@ let video;
 let label = "Esperando...";
 // El clasificador
 let classifier;
-let modelURL = 'https://teachablemachine.withgoogle.com/models/MI_MODELO/'; // Reemplaza con la URL de tu modelo
+let modelURL = 'https://teachablemachine.withgoogle.com/models/sva6lJ8Qv/'; // Reemplaza con la URL de tu modelo
 
 // Paso 1: Cargar el modelo
 function preload() {
@@ -70,4 +70,5 @@ function gotResults(error, results) {
     label = results[0].label;
     classifyVideo();
 }
+
 
