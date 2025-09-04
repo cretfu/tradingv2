@@ -1,63 +1,73 @@
-// Variable para el clasificador
-let classifier;
-// Etiqueta resultante
-let label = "Esperando...";
-// Video
+// Teachable Machine
+// https://editor.p5js.org/
+
+// Variable para el video
 let video;
-// URL del modelo (¡cambia esta URL por la de tu modelo!)
-let modelURL = 'https://teachablemachine.withgoogle.com/models/sva6lJ8Qv/';
+// Variable para guardar el label
+let label = "Esperando...";
+// El clasificador
+let classifier;
+let modelURL = 'https://teachablemachine.withgoogle.com/models/MI_MODELO/'; // Reemplaza con la URL de tu modelo
 
-// Preload para cargar el modelo
+// Paso 1: Cargar el modelo
 function preload() {
-  classifier = ml5.imageClassifier(modelURL + 'model.json');
+    classifier = ml5.imageClassifier(modelURL + 'model.json');
 }
 
-// Setup del sketch
 function setup() {
-  createCanvas(640, 480);
-  // Crear el video y ocultarlo
-  video = createCapture(VIDEO);
-  video.hide();
-  // Comenzar la clasificación
-  classifyVideo();
+    createCanvas(640, 520);
+    // Crear el video con la cámara trasera
+    let constraints = {
+        video: {
+            facingMode: { exact: "environment" } // Usar la cámara trasera
+        }
+    };
+    video = createCapture(constraints);
+    video.hide();
+    // Paso 2: Empezar la clasificación
+    classifyVideo();
 }
 
-// Función para clasificar el video
+// Paso 2: Clasificar el video
 function classifyVideo() {
-  classifier.classify(video, gotResults);
+    classifier.classify(video, gotResults);
 }
 
-// Callback para obtener los resultados
-function gotResults(error, results) {
-  if (error) {
-    console.error(error);
-    return;
-  }
-  // results[0] contiene la etiqueta y confianza más alta
-  label = results[0].label;
-  // Volver a clasificar
-  classifyVideo();
-}
-
-// Dibujar en el canvas
 function draw() {
-  background(0);
-  // Dibujar el video
-  image(video, 0, 0, width, height);
-  
-  // Dibujar la etiqueta
-  fill(255);
-  textSize(32);
-  textAlign(CENTER);
-  text(label, width / 2, height - 20);
-  
-  // Opcional: según la etiqueta, mostrar un emoji o mensaje
-  let emoji = "🔴";
-  if (label == "Compra") {
-    emoji = "✅";
-  } else if (label == "Venta") {
-    emoji = "🟥";
-  }
-  textSize(100);
-  text(emoji, width / 2, height / 2);
+    background(0);
+    // Dibujar el video
+    image(video, 0, 0);
+    // Dibujar el label
+    textSize(32);
+    textAlign(CENTER, CENTER);
+    fill(255);
+    text(label, width / 2, height - 16);
+    // Elegir emoji y mensaje según la label
+    let emoji = "🔴";
+    let mensaje = "";
+    if (label == "Compra") {
+        emoji = "✅";
+        mensaje = "Señal de COMPRA";
+    } else if (label == "Venta") {
+        emoji = "🟥";
+        mensaje = "Señal de VENTA";
+    }
+    // Dibujar el emoji
+    textSize(256);
+    text(emoji, width / 2, height / 2);
+    textSize(32);
+    text(mensaje, width / 2, height / 1.2);
 }
+
+// Paso 3: Obtener los resultados de la clasificación
+function gotResults(error, results) {
+    // Si hay un error, mostrarlo en consola
+    if (error) {
+        console.error(error);
+        return;
+    }
+    // Guardar el label y volver a clasificar
+    label = results[0].label;
+    classifyVideo();
+}
+
