@@ -1,74 +1,76 @@
-// Teachable Machine
-// https://editor.p5js.org/
+// Teachable Machine - Detector de Patrones de Velas
+// URL de tu modelo (¡reemplaza con la URL de tu modelo de Teachable Machine!)
+let modelURL = 'https://teachablemachine.withgoogle.com/models/TU_MODELO_AQUI/';
 
-// Variable para el video
-let video;
-// Variable para guardar el label
-let label = "Esperando...";
-// El clasificador
+// Variables globales
 let classifier;
-let modelURL = 'https://teachablemachine.withgoogle.com/models/sva6lJ8Qv/'; // Reemplaza con la URL de tu modelo
+let video;
+let label = "Esperando...";
+let confidence = 0;
 
-// Paso 1: Cargar el modelo
+// Precargar el modelo
 function preload() {
-    classifier = ml5.imageClassifier(modelURL + 'model.json');
+  classifier = ml5.imageClassifier(modelURL + 'model.json');
 }
 
+// Configuración inicial
 function setup() {
-    createCanvas(640, 520);
-    // Crear el video con la cámara trasera
-    let constraints = {
-        video: {
-            facingMode: { exact: "environment" } // Usar la cámara trasera
-        }
-    };
-    video = createCapture(constraints);
-    video.hide();
-    // Paso 2: Empezar la clasificación
-    classifyVideo();
+  createCanvas(640, 520);
+  
+  // Configurar la cámara trasera (facingMode: 'environment')
+  let constraints = {
+    video: {
+      facingMode: 'environment' // Usa la cámara trasera
+    }
+  };
+  
+  // Crear la captura de video con las restricciones
+  video = createCapture(constraints);
+  video.hide();
+  
+  // Iniciar la clasificación
+  classifyVideo();
 }
 
-// Paso 2: Clasificar el video
+// Función para clasificar el video
 function classifyVideo() {
+  if (classifier && video) {
     classifier.classify(video, gotResults);
+  } else {
+    console.error("Classifier o video no están listos.");
+  }
 }
 
-function draw() {
-    background(0);
-    // Dibujar el video
-    image(video, 0, 0);
-    // Dibujar el label
-    textSize(32);
-    textAlign(CENTER, CENTER);
-    fill(255);
-    text(label, width / 2, height - 16);
-    // Elegir emoji y mensaje según la label
-    let emoji = "🔴";
-    let mensaje = "";
-    if (label == "Compra") {
-        emoji = "✅";
-        mensaje = "Señal de COMPRA";
-    } else if (label == "Venta") {
-        emoji = "🟥";
-        mensaje = "Señal de VENTA";
-    }
-    // Dibujar el emoji
-    textSize(256);
-    text(emoji, width / 2, height / 2);
-    textSize(32);
-    text(mensaje, width / 2, height / 1.2);
-}
-
-// Paso 3: Obtener los resultados de la clasificación
+// Función para manejar los resultados
 function gotResults(error, results) {
-    // Si hay un error, mostrarlo en consola
-    if (error) {
-        console.error(error);
-        return;
-    }
-    // Guardar el label y volver a clasificar
-    label = results[0].label;
-    classifyVideo();
+  if (error) {
+    console.error(error);
+    label = "Error";
+    return;
+  }
+  
+  // Mostrar resultados en consola
+  console.log(results);
+  
+  // Actualizar label y confianza
+  label = results[0].label;
+  confidence = results[0].confidence;
+  
+  // Clasificar nuevamente
+  classifyVideo();
 }
 
+// Dibujar en el canvas
+function draw() {
+  background(0);
+  
+  // Dibujar el video
+  image(video, 0, 0, width, height);
+  
+  // Dibujar el label y confianza
+  fill(255);
+  textSize(32);
+  textAlign(CENTER);
+  text(label + " (" + nf(confidence * 100, 2, 1) + "%)", width / 2, height - 20);
+}
 
